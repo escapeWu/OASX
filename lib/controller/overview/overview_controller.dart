@@ -56,10 +56,9 @@ class OverviewController extends GetxController {
 
   Future<void> wsConnet() async {
     try {
-      String address = 'ws://${ApiClient().address}/ws/$name';
-      if (address.contains('http://')) {
-        address = address.replaceAll('http://', '');
-      }
+      String protocol = ApiClient().address.startsWith('https://') ? 'wss://' : 'ws://';
+      String address = '${protocol}${ApiClient().address.replaceFirst(RegExp(r'^https?://'), '')}/ws/$name';
+      
       printInfo(info: address);
       channel = WebSocketChannel.connect(Uri.parse(address));
     } on SocketException {

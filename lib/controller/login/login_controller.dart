@@ -31,7 +31,11 @@ class LoginController extends GetxController {
   }
 
   Future<void> login(String address) async {
-    ApiClient().setAddress('http://$address');
+    // Check if the address already contains a scheme
+    if (!address.startsWith('http://') && !address.startsWith('https://')) {
+      address = 'http://' + address; // Default to http:// if no scheme is provided
+    }
+    ApiClient().setAddress(address);
     if (await ApiClient().testAddress()) {
       // Get.snackbar('Success', 'Successfully connected to OAS server');
       Get.offAllNamed('/main');

@@ -34,42 +34,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # 获取最新的 Release 信息（使用内置的 github.token 进行 API 认证）
-      - name: Get latest release
-        id: get_release
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            const { data: releases } = await github.repos.listReleases({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-            if (!releases || releases.length === 0) {
-              core.setFailed('No releases found in the repository.');
-            }
-            const latestRelease = releases[0];
-            const version = latestRelease.tag_name.replace(/^v/, '') + '+1';
-            console.log(JSON.stringify(latestRelease, null, 2));
-            core.setOutput('upload_url', latestRelease.upload_url);
-            core.setOutput('tag_name', latestRelease.tag_name);
-            core.setOutput('version', version);
-
-      # 更新 pubspec.yaml 中的版本号
-      - name: Update version
-        uses: fjogeleit/yaml-update-action@main
-        with:
-          valueFile: 'pubspec.yaml'
-          propertyPath: 'version'
-          value: ${{ steps.get_release.outputs.version }}
-          commitChange: false
-
       # 构建 Flutter Web 应用
       - name: Build Flutter Web App
         id: build
         run: flutter build web --web-renderer canvaskit --base-href="/OASX/"
 
-      # 将构建后的静态文件部署到 GitHub Pages（同样使用内置的 github.token）
+      # 将构建后的静态文件部署到 GitHub Pages（使用内置的 github.token）
       - name: Upload Release Web
         uses: JamesIves/github-pages-deploy-action@v4
         with:

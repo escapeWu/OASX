@@ -1,0 +1,48 @@
+on:
+  push:
+    branches: 
+      - master
+name: Build-Release[TestWeb]
+
+jobs:
+  build_and_package:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      
+      # 检出仓库代码
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      # 设置 Flutter 环境
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.3'
+          channel: 'stable'
+
+      # 列出仓库中的文件
+      - name: List files in the repository
+        run: ls ${{ github.workspace }}
+
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+      - run: flutter --version
+
+      # 安装 Flutter 依赖
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 构建 Flutter Web 应用
+      - name: Build Flutter Web App
+        id: build
+        run: flutter build web --web-renderer canvaskit --base-href="/OASX/"
+
+      # 将构建后的静态文件部署到 GitHub Pages（使用内置的 github.token）
+      - name: Upload Release Web
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          token: ${{ github.token }}
+          branch: page
+          folder: build/web
